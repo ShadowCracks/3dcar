@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Model Viewer</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script>
+    // Scene, Camera, Renderer
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Add lighting
+    const light = new THREE.AmbientLight(0xffffff, 1); // Soft white light
+    scene.add(light);
+
+    // Load 3D Model
+    const loader = new THREE.GLTFLoader();
+    loader.load(
+      '/scene.gltf', // Replace with the path to your model
+      (gltf) => {
+        scene.add(gltf.scene);
+        gltf.scene.position.set(0, 0, 0);
+      },
+      undefined,
+      (error) => {
+        console.error(error);
+      }
+    );
+
+    // Camera Position
+    camera.position.z = 5;
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Make the model interactive
+    let isMouseDown = false, startX = 0, startY = 0;
+    const rotationSpeed = 0.01;
+    document.addEventListener('mousedown', (event) => {
+      isMouseDown = true;
+      startX = event.clientX;
+      startY = event.clientY;
+    });
+
+    document.addEventListener('mousemove', (event) => {
+      if (isMouseDown) {
+        const dx = (event.clientX - startX) * rotationSpeed;
+        const dy = (event.clientY - startY) * rotationSpeed;
+        scene.rotation.y += dx;
+        scene.rotation.x += dy;
+        startX = event.clientX;
+        startY = event.clientY;
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      isMouseDown = false;
+    });
+  </script>
+</body>
+</html>
